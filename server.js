@@ -4,6 +4,7 @@ const {URL} = require('url');
 const {Issuer, generators} = require('openid-client');
 const authorManager = require('ep_etherpad-lite/node/db/AuthorManager');
 
+let global_settings;
 const oidc_settings = {};
 let oidc_client = null;
 
@@ -46,15 +47,16 @@ async function authCallback(req, res) {
 
   const userinfo = await oidc_client.userinfo(tokenset);
   const sub = userinfo.sub;
-  const user_name = userinfo[oidc_settings.author_name_key];
   oidc_session.sub = sub;
-  session.user = {
-    username: sub,
-    name: user_name,
-    is_admin: false,
-  };
+  if (!(sub in global_settings.users)) {
+    global_settings.users[sub] = {};
+  }
+  session.user = global_settings.users[sub];
+  session.user.username = sub;
+  session.user.name =
+    userinfo[oidc_settings.author_name_key] || session.user.name;
 
-  authorManager.createAuthorIfNotExistsFor(sub, user_name);
+  authorManager.createAuthorIfNotExistsFor(sub, session.user.name);
   res.redirect(oidc_session.next || '/');
   delete oidc_session.next;
 }
@@ -66,6 +68,7 @@ async function setUsername(token, username) {
 }
 
 exports.loadSettings = (hook_name, {settings}) => {
+  global_settings = settings;
   const my_settings = settings['ep_openid-client'];
 
   if (!my_settings) {
