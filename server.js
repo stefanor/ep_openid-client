@@ -33,18 +33,18 @@ async function authCallback(req, res) {
   const {nonce, state} = oidc_session;
   delete oidc_session.nonce;
   delete oidc_session.state;
-  let tokenset;
+  let userinfo;
   try {
-    tokenset = await oidc_client.callback(redirectURL(), params, {
+    const tokenset = await oidc_client.callback(redirectURL(), params, {
       nonce,
       state,
     });
+    userinfo = await oidc_client.userinfo(tokenset);
   } catch (e) {
     console.log('Authentication failed', e);
     return res.send('Authentication failed');
   }
 
-  const userinfo = await oidc_client.userinfo(tokenset);
   const sub = userinfo.sub;
   const user_name = userinfo[oidc_settings.author_name_key];
   oidc_session.sub = sub;
