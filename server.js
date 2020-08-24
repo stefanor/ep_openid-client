@@ -49,6 +49,7 @@ async function authCallback(req, res) {
   const user_name = userinfo[oidc_settings.author_name_key];
   oidc_session.sub = sub;
   session.user = {
+    username: sub,
     name: user_name,
     is_admin: false,
   };
