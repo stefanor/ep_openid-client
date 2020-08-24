@@ -107,7 +107,6 @@ exports.expressCreateServer = (hook_name, {app}) => {
   console.debug('ep_openid-client: Configuring auth routes');
   app.get('/logout', (req, res) =>
     req.session.destroy(() => {
-      req.logout();
       res.redirect('/');
     })
   );
