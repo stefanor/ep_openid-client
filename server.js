@@ -29,7 +29,7 @@ async function authCallback(req, res) {
 
   const params = oidc_client.callbackParams(req);
   const {session} = req;
-  const oidc_session = req.session['ep_openid-client'] || {};
+  const oidc_session = session['ep_openid-client'] || {};
   const {nonce, state} = oidc_session;
   delete oidc_session.nonce;
   delete oidc_session.state;
