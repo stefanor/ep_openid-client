@@ -3,14 +3,14 @@
     {
       "name": "ep_openid-client",
       "client_hooks": {
-        "postToolbarInit": "ep_openid-client/static/js/client:postToolbarInit"
+        "postToolbarInit": "ep_openid-client/static/js/client"
       },
       "hooks": {
-        "authenticate": "ep_openid-client/server.js:authenticate",
-        "clientVars": "ep_openid-client/server.js:clientVars",
-        "expressCreateServer": "ep_openid-client/server.js:expressCreateServer",
-        "handleMessage": "ep_openid-client/server.js:handleMessage",
-        "loadSettings": "ep_openid-client/server.js:loadSettings"
+        "authenticate": "ep_openid-client/server.js",
+        "clientVars": "ep_openid-client/server.js",
+        "expressCreateServer": "ep_openid-client/server.js",
+        "handleMessage": "ep_openid-client/server.js",
+        "loadSettings": "ep_openid-client/server.js"
       }
     }
   ]
