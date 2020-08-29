@@ -127,7 +127,7 @@ exports.authenticate = (hook_name, {req, res, next}) => {
     return next();
   }
   if (oidc_settings.permit_anonymous_read_only) {
-    if (req.path.match(/^\/(locales\.json|(p\/r\.|socket.io\/).*)$/)) {
+    if (req.path.match(/^\/(locales\.json|(p\/r\.|socket\.io\/).*)$/)) {
       return next();
     }
   }
