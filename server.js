@@ -30,14 +30,12 @@ function authCallback(req, res, next) {
     const params = oidc_client.callbackParams(req);
     const {session} = req;
     const oidc_session = session['ep_openid-client'] || {};
-    const {nonce, state} = oidc_session;
-    if (nonce == null || state == null) {
+    const {authParams} = oidc_session;
+    if (authParams == null) {
       throw new Error('no authentication paramters found in session state');
     }
-    const tokenset = await oidc_client.callback(redirectURL(), params, {
-      nonce,
-      state,
-    });
+    const tokenset =
+        await oidc_client.callback(redirectURL(), params, authParams);
 
     const userinfo = await oidc_client.userinfo(tokenset);
     const sub = userinfo.sub;
@@ -51,8 +49,7 @@ function authCallback(req, res, next) {
     res.redirect(oidc_session.next || '/');
     // Defer deletion of state until success so that the user can reload the
     // page to retry after a transient backchannel failure.
-    delete oidc_session.nonce;
-    delete oidc_session.state;
+    delete oidc_session.authParams;
     delete oidc_session.next;
   })().catch(next);
 }
@@ -131,11 +128,11 @@ exports.authenticate = (hook_name, {req, res, next}) => {
     }
   }
   session.next = req.url;
-  session.nonce = generators.nonce();
-  session.state = generators.state();
-  return res.redirect(
-    oidc_client.authorizationUrl({nonce: session.nonce, state: session.state})
-  );
+  session.authParams = Object.freeze({
+    nonce: generators.nonce(),
+    state: generators.state(),
+  });
+  return res.redirect(oidc_client.authorizationUrl(session.authParams));
 };
 
 exports.handleMessage = (hook_name, {message, client}, cb) => {
