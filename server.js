@@ -135,11 +135,11 @@ exports.authenticate = (hook_name, {req, res, next}) => {
   return res.redirect(oidc_client.authorizationUrl(session.authParams));
 };
 
-exports.handleMessage = (hook_name, {message, client}, cb) => {
+exports.handleMessage = async (hook_name, {message, client}) => {
   console.debug('ep_openid-client: handleMessage hook', message);
 
-  const approve = () => cb([message]);
-  const deny = () => cb([null]);
+  const approve = [message];
+  const deny = [null];
 
   const {session} = client.client.request;
   let name;
@@ -155,8 +155,8 @@ exports.handleMessage = (hook_name, {message, client}, cb) => {
         message.token,
         name
       );
-      setUsername(message.token, name).finally(approve);
-      return;
+      await setUsername(message.token, name);
+      return approve;
     } else if (
       message.type == 'COLLABROOM' &&
       message.data.type == 'USERINFO_UPDATE'
@@ -166,9 +166,9 @@ exports.handleMessage = (hook_name, {message, client}, cb) => {
         !oidc_settings.permit_author_name_change
       ) {
         console.info('ep_openid-client: Rejecting name change');
-        return deny();
+        return deny;
       }
     }
   }
-  return approve();
+  return approve;
 };
