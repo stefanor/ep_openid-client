@@ -31,6 +31,9 @@ function authCallback(req, res, next) {
     const {session} = req;
     const oidc_session = session['ep_openid-client'] || {};
     const {nonce, state} = oidc_session;
+    if (nonce == null || state == null) {
+      throw new Error('no authentication paramters found in session state');
+    }
     const tokenset = await oidc_client.callback(redirectURL(), params, {
       nonce,
       state,
