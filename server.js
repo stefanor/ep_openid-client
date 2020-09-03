@@ -24,37 +24,32 @@ async function createClient() {
   console.info('ep_openid-client: Client discovery complete. Configured.');
 }
 
-async function authCallback(req, res) {
+function authCallback(req, res, next) {
   console.debug('ep_openid-client: Processing auth callback');
-
-  const params = oidc_client.callbackParams(req);
-  const {session} = req;
-  const oidc_session = session['ep_openid-client'] || {};
-  const {nonce, state} = oidc_session;
-  delete oidc_session.nonce;
-  delete oidc_session.state;
-  let userinfo;
-  try {
+  return (async () => {
+    const params = oidc_client.callbackParams(req);
+    const {session} = req;
+    const oidc_session = session['ep_openid-client'] || {};
+    const {nonce, state} = oidc_session;
+    delete oidc_session.nonce;
+    delete oidc_session.state;
     const tokenset = await oidc_client.callback(redirectURL(), params, {
       nonce,
       state,
     });
-    userinfo = await oidc_client.userinfo(tokenset);
-  } catch (e) {
-    console.log('Authentication failed', e);
-    return res.send('Authentication failed');
-  }
 
-  const sub = userinfo.sub;
-  const user_name = userinfo[oidc_settings.author_name_key];
-  oidc_session.sub = sub;
-  session.user = {
-    name: user_name,
-    is_admin: false,
-  };
+    const userinfo = await oidc_client.userinfo(tokenset);
+    const sub = userinfo.sub;
+    const user_name = userinfo[oidc_settings.author_name_key];
+    oidc_session.sub = sub;
+    session.user = {
+      name: user_name,
+      is_admin: false,
+    };
 
-  res.redirect(oidc_session.next || '/');
-  delete oidc_session.next;
+    res.redirect(oidc_session.next || '/');
+    delete oidc_session.next;
+  })().catch(next);
 }
 
 async function setUsername(token, username) {
