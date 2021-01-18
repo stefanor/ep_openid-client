@@ -7,6 +7,12 @@ It uses provider discovery to keep configuration simple.
 Unlike other auth plugins, this one is not based around passport, for
 simplicity.
 
+## DEPRECATED
+
+We recommend [ep_openid_connect][] instead.
+
+[ep_openid_connect]: (https://github.com/ether/ep_openid_connect/)
+
 ## Settings
 
 The plugin expects an `ep_openid-client` block in the settings, with
